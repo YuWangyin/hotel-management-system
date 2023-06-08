@@ -1,0 +1,165 @@
+﻿//顾客注册界面的功能
+#include "registerdialog.h"
+#include "ui_registerdialog.h"
+#include <QDate>
+#include <QSqlQuery>
+#include <QDebug>
+
+
+//顾客注册界面代码
+
+RegisterDialog::RegisterDialog(QWidget *parent) :
+    QDialog(parent),
+    ui(new Ui::RegisterDialog)
+{
+    ui->setupUi(this);
+    this->InitForm();
+}
+
+RegisterDialog::~RegisterDialog()
+{
+    delete ui;
+}
+
+void RegisterDialog::InitForm()
+{
+    this->setWindowFlags(Qt::FramelessWindowHint);// 无边框窗口
+    setWindowFlags(windowFlags()&~Qt::WindowCloseButtonHint&~Qt::WindowContextHelpButtonHint);//去掉登录框的问号
+    this->InitControls();       //控件初始化
+    //this->connect(ui->CustomerRePwd,SIGNAL(textChanged(QString)),SLOT(CheckPwdIsSame()));
+}
+
+/*
+ *函数功能：控件初始化
+ *说明：初始化界面的控件
+*/
+void RegisterDialog::InitControls()
+{
+    ui->CustomerName->setFocus();
+    /*日期控件的设置*/
+    ui->CustomerDateTime->setCalendarPopup(true);// 开启日历弹出窗口
+    ui->CustomerDateTime->setDate(QDate::currentDate());// 设置为当前日期
+
+    location = this->geometry();// 获取窗口初始位置
+    mousePressed = false;
+    //安装事件监听器,让标题栏识别鼠标双击
+    ui->lab_Title->installEventFilter(this);
+    IconHelper::Instance()->SetIcon(ui->btnMenu_Close, QChar(0xf00d), 10);// 设置关闭按钮图标
+    IconHelper::Instance()->SetIcon(ui->lab_Ico, QChar(0xf015), 12);// 设置界面图标
+
+    ui->btnCancel->setToolTip(tr("取消"));
+    ui->btnOk->setToolTip(tr("注册"));
+
+    //正则表达式，对输入的内容进行限制，电话号码11位
+    QRegExp rxPhone("\\d{11}$");
+    QRegExpValidator *regPhone = new QRegExpValidator(rxPhone,this);
+    ui->CustomerPhone->setValidator(regPhone);
+}
+
+bool RegisterDialog::eventFilter(QObject *obj, QEvent *event)
+{
+    //用户按下回车键,触发登录信号.
+    if (event->type() == QEvent::KeyPress)
+    {
+        QKeyEvent *keyEvent = static_cast<QKeyEvent *>(event);
+
+        if (keyEvent->key() == Qt::Key_Return || keyEvent->key()==Qt::Key_Enter)
+        {
+            this->on_btnOk_clicked();// 触发注册按钮点击事件
+            return true;
+        }
+    }
+    return QObject::eventFilter(obj,event);
+}
+
+void RegisterDialog::mouseMoveEvent(QMouseEvent *e)//鼠标移动事件
+{
+    if(mousePressed && (e->buttons()) && Qt::LeftButton)// 如果鼠标左键被按下并且移动，则将窗口移动到当前鼠标位置
+    {
+        this->move(e->globalPos() - mousePoint);// 移动窗口到鼠标位置
+        e->accept();// 接收鼠标事件
+    }
+}
+
+void RegisterDialog::mousePressEvent(QMouseEvent *e)//鼠标按下事件
+{
+    if(e->button() == Qt::LeftButton)// 如果鼠标左键被按下，则记录当前鼠标位置和窗口位置，并设置mousePressed标志为true
+    {
+        mousePressed = true;// 鼠标左键被按下
+        mousePoint = e->globalPos() - this->pos();// 鼠标位置减去窗口位置
+        e->accept();// 接收鼠标事件
+    }
+}
+
+void RegisterDialog::mouseReleaseEvent(QMouseEvent *)//鼠标释放事件
+{
+    mousePressed = false;// 鼠标左键被释放
+}
+
+/*
+ *函数功能：注册
+ *说明：进行写库操作，将客户信息写进数据库
+*/
+void RegisterDialog::on_btnOk_clicked()
+{
+    //数据库中已经设置了id为主键，且自动递增序号
+    //int customerId = mysql->SearchMaxValue("Id","Customer") + 1;
+	// 获取用户填写的信息
+    QString customerName = ui->CustomerName->text();
+    QString customerSex = ui->comboBoxSex->currentText();
+    QString customerPwd = ui->CustomerPwd->text();
+    QString customerRePwd = ui->CustomerRePwd->text();
+    QString customerPhone = ui->CustomerPhone->text();
+    QString customerAddress = ui->CustomerAddress->text();
+    QString customerRemark = ui->CustomerRemark->text();
+	// 获取当前时间
+    QString CustomerData = QDateTime::currentDateTime().toString("yyyy-MM-dd hh:mm:ss ddd");
+	// 如果必填项未填写，则提示用户
+    if(customerName.isEmpty()&& customerPwd.isEmpty() &&customerRePwd.isEmpty())
+    {
+        myHelper::ShowMessageBoxInfo(tr("必须填满带 * 的内容!"));// 提示信息
+    }
+	// 如果两次密码不一致，则提示用户
+    else if(customerRePwd != customerPwd)
+    {
+        myHelper::ShowMessageBoxError(tr("两次密码不一致，请重新输入!"));// 提示信息
+        ui->CustomerPwd->setFocus();// 将焦点设置到密码框
+    }
+    else
+    {
+		// 将客户信息写入数据库
+		QSqlQuery query;
+		qDebug() <<query.exec("INSERT INTO customer (CustomerName, CustomerSex, CustomerPassword, CustomerPhone, CustomerAddress, CustomerData, CustomerRemark) VALUES ('"+customerName+"', '"+customerSex+"', '"+customerPwd+"', '"+customerPhone+"', '"+customerAddress+"', '"+CustomerData+"', '"+customerRemark+"')");
+		qDebug() <<"update666!";
+
+        myHelper::MyLoginBlog("log","注册","新用户注册",customerName);// 记录日志
+        myHelper::ShowMessageBoxInfo(tr("注册成功!"));// 提示注册成功
+
+    }
+}
+
+void RegisterDialog::on_btnCancel_clicked()
+{
+    this->close();
+}
+
+void RegisterDialog::on_btnMenu_Close_clicked()
+{
+    this->close();
+}
+
+/*
+ *函数功能：检验两次输入的密码是否一致
+ *说明：若不一致，给组员提醒，要求重新输入
+*/
+void RegisterDialog::CheckPwdIsSame()
+{
+    QString pwd = ui->CustomerPwd->text();
+    QString RePwd = ui->CustomerRePwd->text();
+    if(pwd != RePwd)
+    {
+        myHelper::ShowMessageBoxError(tr("两次密码不一致，请重新输入!"));
+        ui->CustomerPwd->setFocus();
+        return;
+    }
+}

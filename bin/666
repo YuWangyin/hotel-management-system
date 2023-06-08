@@ -1,0 +1,310 @@
+-- MySQL dump 10.10
+--
+-- Host: localhost    Database: hotel
+-- ------------------------------------------------------
+-- Server version	5.0.18-nt
+
+/*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
+/*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
+/*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
+/*!40101 SET NAMES utf8 */;
+/*!40103 SET @OLD_TIME_ZONE=@@TIME_ZONE */;
+/*!40103 SET TIME_ZONE='+00:00' */;
+/*!40014 SET @OLD_UNIQUE_CHECKS=@@UNIQUE_CHECKS, UNIQUE_CHECKS=0 */;
+/*!40014 SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0 */;
+/*!40101 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='NO_AUTO_VALUE_ON_ZERO' */;
+/*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
+
+--
+-- Table structure for table `book`
+--
+
+DROP TABLE IF EXISTS `book`;
+CREATE TABLE `book` (
+  `Id` varchar(20) NOT NULL,
+  `roomno` varchar(10) default NULL,
+  `BookName` varchar(20) default NULL,
+  `roomtypeid` int(11) default NULL,
+  `BookTimeFrom` varchar(20) default NULL,
+  `booktimeto` varchar(20) default NULL,
+  `BookRemark` varchar(100) default NULL,
+  PRIMARY KEY  (`Id`),
+  KEY `RoomTypeId` (`roomtypeid`),
+  CONSTRAINT `book_ibfk_1` FOREIGN KEY (`roomtypeid`) REFERENCES `roomtype` (`RoomTypeId`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+--
+-- Dumping data for table `book`
+--
+
+
+/*!40000 ALTER TABLE `book` DISABLE KEYS */;
+LOCK TABLES `book` WRITE;
+INSERT INTO `book` VALUES ('201420141225190344','104','2014',1,'2014-12-25','2014-12-25',' ');
+UNLOCK TABLES;
+/*!40000 ALTER TABLE `book` ENABLE KEYS */;
+
+--
+-- Table structure for table `currentuser`
+--
+
+DROP TABLE IF EXISTS `currentuser`;
+CREATE TABLE `currentuser` (
+  `UserName` varchar(30) NOT NULL,
+  `UserType` varchar(30) NOT NULL,
+  `UserPwd` varchar(30) NOT NULL,
+  PRIMARY KEY  (`UserName`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+--
+-- Dumping data for table `currentuser`
+--
+
+
+/*!40000 ALTER TABLE `currentuser` DISABLE KEYS */;
+LOCK TABLES `currentuser` WRITE;
+UNLOCK TABLES;
+/*!40000 ALTER TABLE `currentuser` ENABLE KEYS */;
+
+--
+-- Table structure for table `customelogblog`
+--
+
+DROP TABLE IF EXISTS `customelogblog`;
+CREATE TABLE `customelogblog` (
+  `CustomeName` varchar(20) NOT NULL,
+  `custometype` varchar(20) default NULL,
+  `CustomePwd` varchar(20) NOT NULL,
+  PRIMARY KEY  (`CustomeName`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+--
+-- Dumping data for table `customelogblog`
+--
+
+
+/*!40000 ALTER TABLE `customelogblog` DISABLE KEYS */;
+LOCK TABLES `customelogblog` WRITE;
+INSERT INTO `customelogblog` VALUES ('2014','一般顾客','123456');
+UNLOCK TABLES;
+/*!40000 ALTER TABLE `customelogblog` ENABLE KEYS */;
+
+--
+-- Table structure for table `customer`
+--
+
+DROP TABLE IF EXISTS `customer`;
+CREATE TABLE `customer` (
+  `Id` int(11) NOT NULL auto_increment,
+  `CustomerName` varchar(100) default NULL,
+  `CustomerSex` varchar(4) default NULL,
+  `CustomerPassword` varchar(100) default NULL,
+  `CustomerPhone` varchar(20) default NULL,
+  `CustomerAddress` varchar(50) default NULL,
+  `CustomerData` datetime default NULL,
+  `CustomerRemark` varchar(100) default NULL,
+  PRIMARY KEY  (`Id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+--
+-- Dumping data for table `customer`
+--
+
+
+/*!40000 ALTER TABLE `customer` DISABLE KEYS */;
+LOCK TABLES `customer` WRITE;
+INSERT INTO `customer` VALUES (1,'张超','男','123456','15383465606','山西省阳泉市','2000-01-01 00:00:00','张老板'),(2,'曹东山','男','123456','15383465640','山西省太原市太原工业学院','2014-12-22 00:00:00',''),(3,'张益达','男','123456','15388456741','山西省太原市小店','2014-12-22 00:00:00',''),(4,'莉莉','女','123456','13245365678','北京市海定区','2014-12-23 00:00:00',''),(5,'冯晨成','男','123456','12378945678','太原工业学院','2014-12-23 00:00:00',''),(6,'贺景新','女','123456','17484849595','山西省、太原市、太原工业学院22#309','2014-12-24 00:00:00',''),(7,'张俪','女','123456','18293949343','天津市津霸路口','2014-12-25 00:00:00',''),(8,'2',NULL,NULL,NULL,NULL,NULL,NULL),(9,'1','2','3','4',NULL,NULL,NULL),(10,'1','2',NULL,NULL,NULL,NULL,NULL),(11,'呢啊','男','123456','12111111111',NULL,NULL,NULL),(12,'不积跬步','男','123456','22222222222','阿斯弗','2021-02-25 00:00:00','安抚'),(13,'低复','男','123456','333333333','安抚','2021-02-26 00:00:00','是否'),(14,'阿斯弗','男','123456','333333333','安抚','2021-02-26 00:00:00','是否'),(15,'哈哈','男','123456','10086','陕西','2021-02-26 00:00:00','阿斯顿');
+UNLOCK TABLES;
+/*!40000 ALTER TABLE `customer` ENABLE KEYS */;
+
+--
+-- Table structure for table `inroom`
+--
+
+DROP TABLE IF EXISTS `inroom`;
+CREATE TABLE `inroom` (
+  `RoomNo` varchar(20) default NULL,
+  `RoomTypeId` int(11) default NULL,
+  `InRoomTime` varchar(20) default NULL,
+  `InRoomName` varchar(20) default NULL,
+  `InRoomIdCard` varchar(18) default NULL,
+  `InRoomGender` varchar(4) default NULL,
+  `InRoomPhone` varchar(20) default NULL,
+  `InRoomCash` varchar(20) default NULL,
+  `InRoomOrder` varchar(50) NOT NULL,
+  `InRoomRemark` varchar(100) default NULL,
+  PRIMARY KEY  (`InRoomOrder`),
+  KEY `RoomTypeId` (`RoomTypeId`),
+  KEY `RoomNo` (`RoomNo`),
+  CONSTRAINT `inroom_ibfk_1` FOREIGN KEY (`RoomTypeId`) REFERENCES `roomtype` (`RoomTypeId`),
+  CONSTRAINT `inroom_ibfk_2` FOREIGN KEY (`RoomNo`) REFERENCES `room` (`RoomNo`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+--
+-- Dumping data for table `inroom`
+--
+
+
+/*!40000 ALTER TABLE `inroom` DISABLE KEYS */;
+LOCK TABLES `inroom` WRITE;
+INSERT INTO `inroom` VALUES ('101',1,'2014-12-25','张超','622723199011222121','男','13809007893','1000','','');
+UNLOCK TABLES;
+/*!40000 ALTER TABLE `inroom` ENABLE KEYS */;
+
+--
+-- Table structure for table `log`
+--
+
+DROP TABLE IF EXISTS `log`;
+CREATE TABLE `log` (
+  `time` varchar(50) default NULL,
+  `do` varchar(11) default NULL,
+  `can` varchar(11) default NULL,
+  `user` varchar(11) default NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+--
+-- Dumping data for table `log`
+--
+
+
+/*!40000 ALTER TABLE `log` DISABLE KEYS */;
+LOCK TABLES `log` WRITE;
+INSERT INTO `log` VALUES ('1','2','3','4'),('的广告违规','登录','登录系统','管理员'),('的广告违规','登录','登录系统','管理员'),('2021-02-25 21:41:08 周四','登录','登录系统','管理员'),('2021-02-25 22:10:09 周四','登录','登录系统','管理员'),('2021-02-25 22:14:15 周四','登录','登录系统','管理员'),('2021-02-25 22:16:00 周四','登录系统','顾客','张超'),('2021-02-25 22:16:58 周四','登录','登录系统','管理员'),('2021-02-25 23:05:14 周四','注册','新用户注册','十三个'),('6','6',NULL,NULL),('6','6',NULL,NULL),('6','6',NULL,NULL),('6','6',NULL,NULL),('6','6',NULL,NULL),('2021-02-26 00:09:49 周五','注册','新用户注册','低复'),('2021-02-26 00:09:55 周五','注册','新用户注册','阿斯弗'),('2021-02-26 00:12:14 周五','注册','新用户注册','哈哈'),('2021-02-26 00:12:29 周五','登录系统','顾客','哈哈'),('2021-02-26 00:13:23 周五','修改信息','客户','哈哈'),('2021-02-26 00:21:04 周五','登录系统','顾客','哈哈'),('2021-02-26 00:22:10 周五','修改信息','客户','哈哈'),('2021-02-26 00:25:32 周五','登录系统','顾客','哈哈'),('2021-02-26 00:25:51 周五','登录系统','顾客','哈哈'),('2021-02-26 00:26:28 周五','修改信息','客户','哈哈'),('2021-02-26 00:28:16 周五','登录系统','顾客','哈哈'),('2021-02-26 00:30:52 周五','登录','登录系统','管理员');
+UNLOCK TABLES;
+/*!40000 ALTER TABLE `log` ENABLE KEYS */;
+
+--
+-- Table structure for table `logblog`
+--
+
+DROP TABLE IF EXISTS `logblog`;
+CREATE TABLE `logblog` (
+  `TriggerTimer` varchar(50) default NULL,
+  `Trigger` varchar(20) default NULL,
+  `TriggerContent` varchar(45) default NULL,
+  `TriggerUser` varchar(45) default NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+--
+-- Dumping data for table `logblog`
+--
+
+
+/*!40000 ALTER TABLE `logblog` DISABLE KEYS */;
+LOCK TABLES `logblog` WRITE;
+INSERT INTO `logblog` VALUES ('2014-12-25 10:41:57 周四','登录','登录系统','管理员'),('2014-12-25 11:58:36 周四','来客登记','新客人入住','管理员'),('2014-12-27 12:29:30 周六','修改密码','修改管理员的密码','管理员'),('2014-12-27 12:29:35 周六','修改密码','修改管理员的密码','管理员'),('2014-12-27 12:31:19 周六','登录','登录系统','管理员'),('2014-12-27 12:32:59 周六','登录','登录系统','管理员');
+UNLOCK TABLES;
+/*!40000 ALTER TABLE `logblog` ENABLE KEYS */;
+
+--
+-- Table structure for table `outroom`
+--
+
+DROP TABLE IF EXISTS `outroom`;
+CREATE TABLE `outroom` (
+  `Id` int(11) NOT NULL auto_increment,
+  `InRoomOrder` varchar(20) default NULL,
+  `OutRoomTime` datetime default NULL,
+  `OutRoomPrice` int(11) default NULL,
+  `OutRoomRemark` varchar(100) default NULL,
+  PRIMARY KEY  (`Id`),
+  KEY `InRoomOrder` (`InRoomOrder`),
+  CONSTRAINT `outroom_ibfk_1` FOREIGN KEY (`InRoomOrder`) REFERENCES `inroom` (`InRoomOrder`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+--
+-- Dumping data for table `outroom`
+--
+
+
+/*!40000 ALTER TABLE `outroom` DISABLE KEYS */;
+LOCK TABLES `outroom` WRITE;
+UNLOCK TABLES;
+/*!40000 ALTER TABLE `outroom` ENABLE KEYS */;
+
+--
+-- Table structure for table `room`
+--
+
+DROP TABLE IF EXISTS `room`;
+CREATE TABLE `room` (
+  `RoomNo` varchar(20) NOT NULL,
+  `RoomTypeId` int(11) default NULL,
+  `RoomState` varchar(50) default NULL,
+  `RoomRemark` varchar(100) default NULL,
+  PRIMARY KEY  (`RoomNo`),
+  KEY `RoomTypeId` (`RoomTypeId`),
+  CONSTRAINT `room_ibfk_1` FOREIGN KEY (`RoomTypeId`) REFERENCES `roomtype` (`RoomTypeId`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+--
+-- Dumping data for table `room`
+--
+
+
+/*!40000 ALTER TABLE `room` DISABLE KEYS */;
+LOCK TABLES `room` WRITE;
+INSERT INTO `room` VALUES ('1001',4,'空',NULL),('1002',4,'满',NULL),('1003',4,'空',NULL),('1004',4,'空',NULL),('1005',4,'空',NULL),('101',1,'满',NULL),('102',1,'满',NULL),('103',1,'空',NULL),('104',1,'空',NULL),('105',2,'空',NULL),('106',2,'空',NULL),('107',2,'空',NULL),('108',2,'空',NULL),('109',2,'空',NULL),('201',1,'空',NULL),('202',1,'空',NULL),('203',1,'空',NULL),('204',1,'空',NULL),('205',2,'空',NULL),('206',2,'空',NULL),('207',2,'空',NULL),('208',2,'空',NULL),('209',2,'空',NULL),('301',1,'空',NULL),('302',1,'空',NULL),('303',1,'空',NULL),('304',1,'空',NULL),('305',2,'空',NULL),('306',2,'维修',NULL),('307',2,'空',NULL),('308',2,'空',NULL),('309',2,'空',NULL),('401',1,'空',NULL),('402',1,'空',NULL),('403',1,'空',NULL),('404',1,'空',NULL),('405',2,'空',NULL),('406',2,'空',NULL),('407',2,'空',NULL),('408',2,'空',NULL),('409',2,'空',NULL),('501',1,'保留',NULL),('502',1,'保留',NULL),('503',1,'保留',NULL),('504',1,'空',NULL),('505',1,'空',NULL),('506',2,'空',NULL),('507',2,'空',NULL),('508',2,'空',NULL),('509',2,'空',NULL),('601',3,'保留',NULL),('602',3,'保留',NULL),('603',3,'保留',NULL),('604',3,'空',NULL),('605',3,'空',NULL),('606',3,'空',NULL),('607',3,'空',NULL),('608',3,'保留',NULL),('609',3,'保留',NULL),('701',2,'空',NULL),('702',2,'空',NULL),('703',2,'保留',NULL),('704',2,'保留',NULL),('705',2,'空',NULL),('706',2,'空',NULL),('707',2,'空',NULL),('708',2,'空',NULL),('709',2,'空',NULL),('801',3,'空',NULL),('802',3,'保留',NULL),('803',3,'保留',NULL),('804',3,'保留',NULL),('805',3,'空',NULL),('806',3,'空',NULL),('807',3,'空',NULL),('808',3,'空',NULL),('809',3,'空',NULL),('901',3,'空',NULL),('902',3,'空',NULL),('903',3,'空',NULL),('904',3,'保留',NULL),('905',3,'保留',NULL),('906',3,'空',NULL),('907',3,'空',NULL),('908',3,'空',NULL),('909',3,'空',NULL);
+UNLOCK TABLES;
+/*!40000 ALTER TABLE `room` ENABLE KEYS */;
+
+--
+-- Table structure for table `roomtype`
+--
+
+DROP TABLE IF EXISTS `roomtype`;
+CREATE TABLE `roomtype` (
+  `RoomTypeId` int(11) NOT NULL auto_increment,
+  `Typename` varchar(20) default NULL,
+  `TypePrice` int(11) default NULL,
+  PRIMARY KEY  (`RoomTypeId`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+--
+-- Dumping data for table `roomtype`
+--
+
+
+/*!40000 ALTER TABLE `roomtype` DISABLE KEYS */;
+LOCK TABLES `roomtype` WRITE;
+INSERT INTO `roomtype` VALUES (1,'单人间',120),(2,'双人间',200),(3,'豪华套间',500),(4,'总统套房',1000);
+UNLOCK TABLES;
+/*!40000 ALTER TABLE `roomtype` ENABLE KEYS */;
+
+--
+-- Table structure for table `staff`
+--
+
+DROP TABLE IF EXISTS `staff`;
+CREATE TABLE `staff` (
+  `StaffNo` varchar(20) NOT NULL,
+  `StaffName` varchar(30) default NULL,
+  `StaffPassword` varchar(100) default NULL,
+  `StaffSex` varchar(4) default NULL,
+  `StaffAddress` varchar(50) default NULL,
+  `StaffType` varchar(20) default NULL,
+  `StaffRemark` varchar(100) default NULL,
+  PRIMARY KEY  (`StaffNo`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+--
+-- Dumping data for table `staff`
+--
+
+
+/*!40000 ALTER TABLE `staff` DISABLE KEYS */;
+LOCK TABLES `staff` WRITE;
+INSERT INTO `staff` VALUES ('1001','admin','000000','男','北京市','管理员',NULL),('1002','小张','123456','男','山西省阳泉市',NULL,NULL);
+UNLOCK TABLES;
+/*!40000 ALTER TABLE `staff` ENABLE KEYS */;
+/*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
+
+/*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
+/*!40014 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS */;
+/*!40014 SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS */;
+/*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
+/*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
+/*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
+/*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
+

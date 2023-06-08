@@ -1,0 +1,244 @@
+﻿//注册界面，查询是否注册，并同步数据库
+#include "costomerregisterinfodialog.h"
+#include "ui_costomerregisterinfodialog.h"
+
+
+#include <QDebug>
+#include <QSqlRecord>
+#include <QSqlQuery>
+#include "app/myhelper.h"
+
+CostomerRegisterInfoDialog::CostomerRegisterInfoDialog(QWidget *parent) :
+    QDialog(parent),
+    ui(new Ui::CostomerRegisterInfoDialog)
+{
+    ui->setupUi(this);
+    this->InitForm();// 初始化界面
+}
+
+CostomerRegisterInfoDialog::~CostomerRegisterInfoDialog()
+{
+    delete ui;
+}
+
+void CostomerRegisterInfoDialog::InitForm()
+{
+    ColumnNames[0] = tr("组员编号");
+    ColumnNames[1] = tr("姓名");
+    ColumnNames[2] = tr("性别");
+    ColumnNames[3] = tr("密码");
+    ColumnNames[4] = tr("电话");
+    ColumnNames[5] = tr("地址");
+    ColumnNames[6] = tr("注册时间");
+    ColumnNames[7] = tr("备注");
+
+    ColumnWidths[0] = 70;
+    ColumnWidths[1] = 100;
+    ColumnWidths[2] = 80;
+    ColumnWidths[3] = 100;
+    ColumnWidths[4] = 100;
+    ColumnWidths[5] = 200;
+    ColumnWidths[6] = 160;
+    ColumnWidths[7] = 200;
+
+    BindCustomInfo("customer",ui->tableView,ColumnNames,ColumnWidths);// 调用函数，将表格与数据库绑定
+
+    ui->CustomerNo->setEnabled(false);  //客户编号不允许修改
+    ui->pbnSave->setEnabled(false);
+    ui->pbnCancel->setEnabled(false);
+
+    SetLineEditNoEdit(); // 设置LineEdit不可编辑
+    this->connect(ui->tableView,SIGNAL(clicked(QModelIndex)),SLOT(showCustomerInfo()));// 当用户在表格中选择一行时，将该行信息显示在窗口上
+
+    //正则表达式，对输入的内容进行限制，电话号码11位
+    QRegExp rxPhone("\\d{11}$");
+    QRegExpValidator *regPhone = new QRegExpValidator(rxPhone,this);
+    ui->CustomerPhone->setValidator(regPhone);
+}
+
+
+//将更新后的内容显示在tableView上
+void CostomerRegisterInfoDialog::RefreshInfo()
+{
+     BindCustomInfo("customer",ui->tableView,ColumnNames,ColumnWidths);// 调用函数，将表格与数据库重新绑定
+}
+
+void CostomerRegisterInfoDialog::BindCustomInfo(QString tableName, QTableView *tableView, QString columnNames[], int columnWidths[])
+{
+    QueryModel = new QSqlQueryModel(this);
+    QString sql = "SELECT *FROM " + tableName+";"; // 生成SQL查询语句
+    qDebug() <<sql;
+    QueryModel->setQuery(sql);// 设置查询模型的数据
+    tableView->setModel(QueryModel);// 设置表格视图的模型为查询模型
+
+    //依次设置列标题、列宽等
+    for (int i = 0;i<tableView->model()->columnCount();i++)
+    {
+        QueryModel->setHeaderData(i,Qt::Horizontal,columnNames[i]);     //设置列标题
+        tableView->setColumnWidth(i,columnWidths[i]);                   //设置列宽
+    }
+
+    tableView->horizontalHeader()->setHighlightSections(false);         //点击表头时不对表头光亮
+    tableView->setSelectionMode(QAbstractItemView::ContiguousSelection);//选中模式为多行选中
+    tableView->setSelectionBehavior(QAbstractItemView::SelectRows);     //选中整行
+    tableView->setStyleSheet( "QTableView::item:hover{background-color:rgb(92,188,227,200)}"
+                              "QTableView::item:selected{background-color:#1B89A1}");
+}
+
+void CostomerRegisterInfoDialog::ClearCustomerInfo()
+{
+    ui->CustomerNo->clear(); //清除文本框内容
+    ui->ledSex->clear();
+    ui->CustomerName->clear();
+    ui->CustomerRePwd->clear();
+    ui->CustomerPhone->clear();
+    ui->ledCustomDate->clear();
+    ui->CustomerAddress->clear();
+    ui->CustomerRemark->clear();
+}
+
+void CostomerRegisterInfoDialog::SetLineEditNoEdit()
+{
+    ui->CustomerNo->setEnabled(false);//设置文本框为不可编辑状态
+    ui->ledSex->setEnabled(false);
+    ui->CustomerName->setEnabled(false);
+    ui->CustomerRePwd->setEnabled(false);
+    ui->CustomerPhone->setEnabled(false);
+    ui->ledCustomDate->setEnabled(false);
+    ui->CustomerAddress->setEnabled(false);
+    ui->CustomerRemark->setEnabled(false);
+}
+
+void CostomerRegisterInfoDialog::SetLineEditEdit()
+{
+    ui->CustomerNo->setEnabled(true); //设置文本框为可编辑状态
+    ui->ledSex->setEnabled(true);
+    ui->CustomerName->setEnabled(true);
+    ui->CustomerRePwd->setEnabled(true);
+    ui->CustomerPhone->setEnabled(true);
+    ui->ledCustomDate->setEnabled(true);
+    ui->CustomerAddress->setEnabled(true);
+    ui->CustomerRemark->setEnabled(true);
+}
+
+/*
+ *函数功能:实时显示当前表格中组员的信息到控件上
+*/
+void CostomerRegisterInfoDialog::showCustomerInfo()
+{
+    QSqlQueryModel userMode(ui->tableView);// 创建新的数据库查询模型
+    QString sql = "SELECT *FROM customer;";// 生成SQL查询语句
+    qDebug() <<sql;
+    userMode.setQuery(QString(sql));// 设置查询模型的数据
+    int Row = ui->tableView->currentIndex().row();// 获取当前选中行
+    QSqlRecord record = userMode.record(Row);// 获取当前行的数据
+	//显示数据
+    ui->CustomerNo->setText(record.value(0).toString());
+    ui->CustomerName->setText(record.value(1).toString());
+    ui->ledSex->setText(record.value(2).toString());
+    ui->CustomerRePwd->setText(record.value(3).toString());
+    ui->CustomerPhone->setText(record.value(4).toString());
+    ui->CustomerAddress->setText(record.value(5).toString());
+    ui->ledCustomDate->setText(record.value(6).toString());
+    ui->CustomerRemark->setText(record.value(7).toString());
+}
+
+void CostomerRegisterInfoDialog::on_checkBoxPwd_clicked(bool checked)
+{
+    if(checked)
+    {// 显示密码
+        ui->CustomerRePwd->setEchoMode(QLineEdit::Normal);
+        ui->checkBoxPwd->setText(tr("隐藏"));
+    }
+    else
+    {// 隐藏密码
+        ui->CustomerRePwd->setEchoMode(QLineEdit::Password);
+        ui->checkBoxPwd->setText(tr("显示"));
+    }
+}
+
+
+
+void CostomerRegisterInfoDialog::on_pbnModify_clicked()// 设置lineEdit控件可以编辑
+{
+    SetLineEditEdit();
+    ui->CustomerNo->setEnabled(false);      //编号不允许修改
+	// 禁用按钮
+   // ui->pbnAddUser->setEnabled(false);
+    ui->pbnModify->setEnabled(false);
+	// 启用按钮
+    ui->pbnSave->setEnabled(true);
+    ui->pbnCancel->setEnabled(true);
+}
+
+void CostomerRegisterInfoDialog::on_pbnCancel_clicked()// 设置lineEdit控件只读
+{
+    SetLineEditEdit();
+    //ui->pbnAddUser->setEnabled(true);
+    ui->pbnModify->setEnabled(true);// 启用按钮
+
+    //ui->pbnAddUser->setEnabled(false);
+    ui->pbnModify->setEnabled(false);// 禁用按钮
+}
+
+void CostomerRegisterInfoDialog::on_pbnSave_clicked()
+{
+	// 获取用户输入的数据
+    QString customerNo = ui->CustomerNo->text();
+    QString customerSex = ui->ledSex->text();
+    QString customerName = ui->CustomerName->text();
+    QString customerPwd = ui->CustomerRePwd->text();
+    QString customerPhone = ui->CustomerPhone->text();
+    QString customerAddress = ui->CustomerAddress->text();
+    QString customeDate = ui->ledCustomDate->text();
+    QString customeRemark = ui->CustomerRemark->text();
+
+    if(customerNo.isEmpty() && customerName.isEmpty()&& customerPwd.isEmpty()&&customerPhone.isEmpty())
+    {
+        myHelper::ShowMessageBoxInfo(tr("必须填满带 * 的内容!")); // 如果必填字段未填写，则弹出提示框
+    }
+    else
+    {
+        QSqlQuery query;
+        QString sql = "update customer set CustomerName = '"+customerName+"' where Id='"+customerNo+"';";// 构造 SQL 更新语句
+        qDebug() <<sql;
+        query.exec(sql);
+        sql = "update customer set CustomerSex = '"+customerSex+"' where Id='"+customerNo+"';";
+        qDebug() <<sql;
+        query.exec(sql);
+        sql = "update customer set CustomerPassword = '"+customerPwd+"' where Id='"+customerNo+"';";
+        qDebug() <<sql;
+        query.exec(sql);
+        sql = "update customer set CustomerPhone = '"+customerPhone+"' where Id='"+customerNo+"';";
+        qDebug() <<sql;
+        query.exec(sql);
+        sql = "update customer set CustomerAddress = '"+customerAddress+"' where Id='"+customerNo+"';";
+        qDebug() <<sql;
+        query.exec(sql);
+        sql = "update customer set CustomerData = '"+customeDate+"' where Id='"+customerNo+"';";
+        qDebug() <<sql;
+        query.exec(sql);
+        sql = "update customer set CustomerRemark = '"+customeRemark+"' where Id='"+customerNo+"';";
+        qDebug() <<sql;
+        query.exec(sql);
+
+
+        qDebug() <<"update ok!";// 输出更新成功的信息
+
+
+
+        myHelper::ShowMessageBoxInfo(tr("更新成功!"));// 弹出更新成功的提示框
+
+
+
+
+        //ui->pbnAddUser->setEnabled(true);
+        ui->pbnModify->setEnabled(true);// 激活修改按钮
+    }
+
+}
+
+void CostomerRegisterInfoDialog::on_tableView_activated(const QModelIndex &index)
+{
+
+}
